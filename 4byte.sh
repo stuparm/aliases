@@ -22,7 +22,16 @@ func4byte() {
         ok=0
     fi
 
-    if [[ ${#input} -eq 66 ]]; then
+    if [[ ${#input} -eq 10 && $ok -eq 1 ]]; then
+        echo "Checking error signature..."
+        response=$(funcErrorSignature "$input")
+        signature=$(funcParseSignature "$response")
+        echo $signature
+
+        ok=0
+    fi 
+
+    if [[ ${#input} -eq 66 && $ok -eq 1 ]]; then
         echo "Checking event signature..."
         response=$(funcEventSignature "$input")
         signature=$(funcParseSignature "$response")
@@ -57,6 +66,16 @@ funcEventSignature() {
     echo $response
 }
 
+funcErrorSignature() {
+    input=$1
+
+    response=$(curl --location $RPC_MAINNET -s \
+        --header 'Content-Type: application/json' \
+        --data '{"method": "tenderly_errorSignatures","params": ["'$input'"] }')
+
+    echo $response
+}
+
 funcParseSignature() {
     json=$1
 
@@ -75,3 +94,4 @@ funcParseSignature() {
 
     echo $function
 }
+
